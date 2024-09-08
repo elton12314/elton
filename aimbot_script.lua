@@ -1,11 +1,17 @@
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local aimbotEnabled = false
+local speedBoostEnabled = false  -- Novo estado para a velocidade
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local ChatService = game:GetService("Chat")
 
 local verticalOffset = 2
+local normalWalkSpeed = 16  -- Velocidade padrão
+local boostedWalkSpeed = 30  -- Nova velocidade aumentada
 
 local function createESP(player)
     local character = player.Character
@@ -79,14 +85,22 @@ local function aimAtClosestPlayer()
     end
 end
 
-game:GetService("RunService").RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
     if aimbotEnabled then
         aimAtClosestPlayer()
     end
 end)
 
-local UIS = game:GetService("UserInputService")
-local ChatService = game:GetService("Chat")
+local function toggleSpeedBoost()
+    speedBoostEnabled = not speedBoostEnabled
+    if speedBoostEnabled then
+        player.Character.Humanoid.WalkSpeed = boostedWalkSpeed
+        print("Velocidade aumentada")
+    else
+        player.Character.Humanoid.WalkSpeed = normalWalkSpeed
+        print("Velocidade normal")
+    end
+end
 
 UIS.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
@@ -96,6 +110,8 @@ UIS.InputBegan:Connect(function(input, gameProcessedEvent)
         else
             print("Aimbot desativado")
         end
+    elseif input.KeyCode == Enum.KeyCode.Y and not gameProcessedEvent then
+        toggleSpeedBoost()
     end
 end)
 
@@ -107,5 +123,7 @@ ChatService.OnMessageDoneFiltering:Connect(function(message)
         else
             print("Aimbot desativado pelo chat")
         end
+    elseif message.Text == "speed" then
+        toggleSpeedBoost()
     end
 end)
