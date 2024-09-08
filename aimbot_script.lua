@@ -1,7 +1,7 @@
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local aimbotEnabled = false
-local speedBoostEnabled = false  -- Novo estado para a velocidade
+local speedBoostEnabled = false
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -10,8 +10,8 @@ local UIS = game:GetService("UserInputService")
 local ChatService = game:GetService("Chat")
 
 local verticalOffset = 2
-local normalWalkSpeed = 16  -- Velocidade padrão
-local boostedWalkSpeed = 30  -- Nova velocidade aumentada
+local normalWalkSpeed = 16
+local boostedWalkSpeed = 30
 
 local function createESP(player)
     local character = player.Character
@@ -89,27 +89,21 @@ RunService.RenderStepped:Connect(function()
     if aimbotEnabled then
         aimAtClosestPlayer()
     end
+    
+    if speedBoostEnabled then
+        player.Character.Humanoid.WalkSpeed = boostedWalkSpeed
+    else
+        player.Character.Humanoid.WalkSpeed = normalWalkSpeed
+    end
 end)
 
 local function toggleSpeedBoost()
     speedBoostEnabled = not speedBoostEnabled
-    if speedBoostEnabled then
-        player.Character.Humanoid.WalkSpeed = boostedWalkSpeed
-        print("Velocidade aumentada")
-    else
-        player.Character.Humanoid.WalkSpeed = normalWalkSpeed
-        print("Velocidade normal")
-    end
 end
 
 UIS.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
         aimbotEnabled = not aimbotEnabled
-        if aimbotEnabled then
-            print("Aimbot ativado")
-        else
-            print("Aimbot desativado")
-        end
     elseif input.KeyCode == Enum.KeyCode.Y and not gameProcessedEvent then
         toggleSpeedBoost()
     end
@@ -118,11 +112,6 @@ end)
 ChatService.OnMessageDoneFiltering:Connect(function(message)
     if message.Text == "." then
         aimbotEnabled = not aimbotEnabled
-        if aimbotEnabled then
-            print("Aimbot ativado pelo chat")
-        else
-            print("Aimbot desativado pelo chat")
-        end
     elseif message.Text == "speed" then
         toggleSpeedBoost()
     end
