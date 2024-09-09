@@ -2,7 +2,6 @@ local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 local aimbotEnabled = false
 local speedBoostEnabled = false
-local flyEnabled = false
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -12,9 +11,7 @@ local ChatService = game:GetService("Chat")
 
 local verticalOffset = 2
 local normalWalkSpeed = 16
-local boostedWalkSpeed = 26
-local flySpeed = 50
-local flyUpSpeed = 22
+local boostedWalkSpeed = 40
 
 local function createESP(player)
     local character = player.Character
@@ -77,7 +74,7 @@ local function aimAtClosestPlayer()
     local closestPlayer = getClosestPlayer()
     if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = closestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, verticalOffset, 0)
-        local camera = Workspace.CurrentCamera
+        local camera = workspace.CurrentCamera
         local screenPosition, onScreen = camera:WorldToViewportPoint(targetPosition)
         
         if onScreen then
@@ -98,69 +95,10 @@ RunService.RenderStepped:Connect(function()
     else
         player.Character.Humanoid.WalkSpeed = normalWalkSpeed
     end
-    
-    if flyEnabled then
-        local character = player.Character
-        local primaryPart = character and character.PrimaryPart
-        if not primaryPart then return end
-
-        local bodyVelocity = primaryPart:FindFirstChildOfClass("BodyVelocity")
-        local bodyGyro = primaryPart:FindFirstChildOfClass("BodyGyro")
-
-        if not bodyVelocity then
-            bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.Velocity = Vector3.new()
-            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
-            bodyVelocity.Parent = primaryPart
-        end
-
-        if not bodyGyro then
-            bodyGyro = Instance.new("BodyGyro")
-            bodyGyro.CFrame = primaryPart.CFrame
-            bodyGyro.P = 3000
-            bodyGyro.D = 500
-            bodyGyro.MaxTorque = Vector3.new(4000, 4000, 4000)
-            bodyGyro.Parent = primaryPart
-        end
-
-        local moveDirection = Vector3.new(0, 0, 0)
-        if UIS:IsKeyDown(Enum.KeyCode.W) then
-            moveDirection = moveDirection + primaryPart.CFrame.LookVector
-        end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then
-            moveDirection = moveDirection - primaryPart.CFrame.LookVector
-        end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then
-            moveDirection = moveDirection - primaryPart.CFrame.RightVector
-        end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then
-            moveDirection = moveDirection + primaryPart.CFrame.RightVector
-        end
-
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then
-            bodyVelocity.Velocity = moveDirection * flySpeed + Vector3.new(0, flyUpSpeed, 0)
-        else
-            bodyVelocity.Velocity = moveDirection * flySpeed
-        end
-    else
-        if player.Character then
-            local primaryPart = player.Character.PrimaryPart
-            if primaryPart then
-                local bodyVelocity = primaryPart:FindFirstChildOfClass("BodyVelocity")
-                local bodyGyro = primaryPart:FindFirstChildOfClass("BodyGyro")
-                if bodyVelocity then bodyVelocity:Destroy() end
-                if bodyGyro then bodyGyro:Destroy() end
-            end
-        end
-    end
 end)
 
 local function toggleSpeedBoost()
     speedBoostEnabled = not speedBoostEnabled
-end
-
-local function toggleFly()
-    flyEnabled = not flyEnabled
 end
 
 UIS.InputBegan:Connect(function(input, gameProcessedEvent)
@@ -168,17 +106,14 @@ UIS.InputBegan:Connect(function(input, gameProcessedEvent)
         aimbotEnabled = not aimbotEnabled
     elseif input.KeyCode == Enum.KeyCode.Y and not gameProcessedEvent then
         toggleSpeedBoost()
-    elseif input.KeyCode == Enum.KeyCode.H and not gameProcessedEvent then
-        toggleFly()
     end
 end)
 
 ChatService.OnMessageDoneFiltering:Connect(function(message)
     if message.Text == "." then
         aimbotEnabled = not aimbotEnabled
-    elseif message.Text == "," then
+    elseif message.Text == "speed" then
         toggleSpeedBoost()
-    elseif message.Text == "fly" then
-        toggleFly()
     end
 end)
+
