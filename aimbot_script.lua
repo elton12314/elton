@@ -11,7 +11,7 @@ local ChatService = game:GetService("Chat")
 
 local verticalOffset = 2
 local normalWalkSpeed = 16
-local boostedWalkSpeed = 40
+local boostedWalkSpeed = 30
 
 local function createESP(player)
     local character = player.Character
@@ -51,7 +51,20 @@ Players.PlayerAdded:Connect(function(player)
     end)
 end)
 
-updateESP()
+-- Loop contínuo para atualizar o ESP
+RunService.RenderStepped:Connect(function()
+    updateESP()
+    
+    if aimbotEnabled then
+        aimAtClosestPlayer()
+    end
+    
+    if speedBoostEnabled then
+        player.Character.Humanoid.WalkSpeed = boostedWalkSpeed
+    else
+        player.Character.Humanoid.WalkSpeed = normalWalkSpeed
+    end
+end)
 
 local function getClosestPlayer()
     local closestPlayer = nil
@@ -74,7 +87,7 @@ local function aimAtClosestPlayer()
     local closestPlayer = getClosestPlayer()
     if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = closestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, verticalOffset, 0)
-        local camera = workspace.CurrentCamera
+        local camera = Workspace.CurrentCamera
         local screenPosition, onScreen = camera:WorldToViewportPoint(targetPosition)
         
         if onScreen then
@@ -84,18 +97,6 @@ local function aimAtClosestPlayer()
         end
     end
 end
-
-RunService.RenderStepped:Connect(function()
-    if aimbotEnabled then
-        aimAtClosestPlayer()
-    end
-    
-    if speedBoostEnabled then
-        player.Character.Humanoid.WalkSpeed = boostedWalkSpeed
-    else
-        player.Character.Humanoid.WalkSpeed = normalWalkSpeed
-    end
-end)
 
 local function toggleSpeedBoost()
     speedBoostEnabled = not speedBoostEnabled
@@ -116,4 +117,3 @@ ChatService.OnMessageDoneFiltering:Connect(function(message)
         toggleSpeedBoost()
     end
 end)
-
